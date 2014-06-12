@@ -36,6 +36,12 @@ module Spree
       tax_category
     end
 
+    let!(:food_category) do
+      tax_category = Spree::TaxCategory.new
+      tax_category.name = "Food"
+      tax_category
+    end
+
     let!(:usa_tax_rate) do
       tax_rate = Spree::TaxRate.new
       tax_rate.name = "USA 10%"
@@ -104,6 +110,17 @@ module Spree
         adjustment = order.line_items.first.adjustments.first
         expect(adjustment.amount).to eq(1) # = 10% of $10.
         expect(adjustment.included).to eq(false)
+      end
+
+      context "with a line item with a different tax category" do
+        before do
+          order.line_items.first.variant.product.tax_category = food_category
+        end
+
+        it "does not apply an adjustment" do
+          Spree::TaxRate.adjust(order)
+          expect(order.line_items.first.adjustments.count).to eq(0)
+        end
       end
 
       context "in the EU zone" do

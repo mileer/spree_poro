@@ -38,14 +38,10 @@ module Spree
     end
 
     def compute(line_item)
-      if line_item.tax_category == tax_category
-        if included_in_price
-          deduced_total_by_rate(line_item.price, self)
-        else
-          round_to_two_places(line_item.price * amount)
-        end
+      if included_in_price
+        deduced_total_by_rate(line_item.price, self)
       else
-        0
+        round_to_two_places(line_item.price * amount)
       end
     end
 
@@ -75,19 +71,23 @@ module Spree
 
     def apply_tax_adjustment(order)
       order.line_items.each do |item|
-        adjustment = Spree::Adjustment.new
-        adjustment.amount = compute(item)
-        adjustment.included = self.included_in_price
-        item.adjustments << adjustment
+        if item.tax_category == tax_category
+          adjustment = Spree::Adjustment.new
+          adjustment.amount = compute(item)
+          adjustment.included = self.included_in_price
+          item.adjustments << adjustment
+        end
       end
     end
 
     def apply_refund(order)
       order.line_items.each do |item|
-        adjustment = Spree::Adjustment.new
-        adjustment.amount = -compute(item)
-        adjustment.included = false
-        item.adjustments << adjustment
+        if item.tax_category == tax_category
+          adjustment = Spree::Adjustment.new
+          adjustment.amount = -compute(item)
+          adjustment.included = false
+          item.adjustments << adjustment
+        end
       end
     end
   end
