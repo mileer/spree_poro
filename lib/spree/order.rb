@@ -2,7 +2,7 @@ module Spree
   class Order
     attr_accessor :line_items, :adjustments
 
-    attr_accessor :item_total, :adjustment_total, :total, :coupon_code
+    attr_accessor :item_total, :adjustment_total, :total, :coupon_code, :tax_zone
 
     def initialize
       self.line_items = []
@@ -25,7 +25,7 @@ module Spree
 
     def apply_coupon_code
       if coupon_code
-        promotion = Spree::DATA[:promotions].find do |promotion|
+        promotion = Spree::Data[:promotions].find do |promotion|
           promotion.code == coupon_code
         end
 
@@ -34,6 +34,10 @@ module Spree
           update_totals
         end
       end
+    end
+
+    def tax_zone
+      @tax_zone || Zone.default_tax
     end
   end
 end

@@ -5,8 +5,8 @@ module Spree
     def initialize
       self.actions = []
 
-      Spree::DATA[:promotions] ||= []
-      Spree::DATA[:promotions] << self
+      Spree::Data[:promotions] ||= []
+      Spree::Data[:promotions] << self
     end
 
     def activate(order)

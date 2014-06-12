@@ -1,5 +1,4 @@
 require 'spec_helper'
-require 'spree'
 
 module Spree
   describe Order do
