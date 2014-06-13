@@ -14,15 +14,17 @@ module Spree
       usa = Spree::Country.new
       zone.members << usa
       zone.default_tax = true
+      zone.kind = 'country'
       zone
     end
 
-    let!(:eu_zone) do
+    let!(:france_zone) do
       zone = Spree::Zone.new
-      zone.name = 'EU'
+      zone.name = 'France'
       france = Spree::Country.new
       zone.members << france
       zone.default_tax = false
+      zone.kind = 'country'
       zone
     end
 
@@ -32,6 +34,38 @@ module Spree
       australia = Spree::Country.new
       zone.members << australia
       zone.default_tax = false
+      zone.kind = 'country'
+      zone
+    end
+
+    let!(:canada) do
+      canada = Spree::Country.new
+      canada.name = 'Canada'
+      canada
+    end
+
+    let!(:bc) do
+      bc = Spree::State.new
+      bc.name = 'bc'
+      bc.country = canada
+      bc
+    end
+
+    let!(:canada_zone) do
+      zone = Spree::Zone.new
+      zone.name = 'Canada'
+      zone.members << canada
+      zone.default_tax = false
+      zone.kind = 'country'
+      zone
+    end
+
+    let!(:bc_zone) do
+      zone = Spree::Zone.new
+      zone.name = 'BC'
+      zone.members << bc
+      zone.default_tax = false
+      zone.kind = 'state'
       zone
     end
 
@@ -59,7 +93,7 @@ module Spree
       tax_rate
     end
 
-    let!(:eu_tax_rate) do
+    let!(:france_tax_rate) do
       tax_rate = Spree::TaxRate.new
       tax_rate.name = "EUR 5%"
       tax_rate.included_in_price = true
@@ -67,7 +101,32 @@ module Spree
       tax_rate.currency = "FRF"
       tax_rate.tax_category = clothing_category
       clothing_category.tax_rates << tax_rate
-      tax_rate.zone = eu_zone
+      tax_rate.zone = france_zone
+      tax_rate
+    end
+
+    let!(:canada_tax_rate) do
+      tax_rate = Spree::TaxRate.new
+      tax_rate.name = "5% PST"
+      tax_rate.included_in_price = true
+      tax_rate.amount = 0.05
+      tax_rate.currency = "CAD"
+      tax_rate.tax_category = clothing_category
+      clothing_category.tax_rates << tax_rate
+      tax_rate.zone = canada_zone
+      tax_rate
+    end
+
+
+    let!(:bc_tax_rate) do
+      tax_rate = Spree::TaxRate.new
+      tax_rate.name = "7% PST"
+      tax_rate.included_in_price = true
+      tax_rate.amount = 0.07
+      tax_rate.currency = "CAD"
+      tax_rate.tax_category = clothing_category
+      clothing_category.tax_rates << tax_rate
+      tax_rate.zone = bc_zone
       tax_rate
     end
 
@@ -80,19 +139,19 @@ module Spree
         it "picks USA tax rates" do
           rates = Spree::TaxRate.match(order)
           expect(rates).to include(usa_tax_rate)
-          expect(rates).to_not include(eu_tax_rate)
+          expect(rates).to_not include(france_tax_rate)
         end
       end
 
       context "based on order tax zone" do
         before do
-          order.tax_zone = eu_tax_rate
+          order.tax_zone = france_zone
         end
 
         it "returns both rates" do
           rates = Spree::TaxRate.match(order)
           expect(rates).to include(usa_tax_rate)
-          expect(rates).to_not include(eu_tax_rate)
+          expect(rates).to_not include(france_tax_rate)
         end
       end
     end
@@ -130,9 +189,9 @@ module Spree
         end
       end
 
-      context "in the EU zone" do
+      context "in the French zone" do
         before do
-          order.tax_zone = eu_zone
+          order.tax_zone = france_zone
           order.currency = 'FRF'
         end
 
@@ -140,8 +199,25 @@ module Spree
           Spree::TaxRate.adjust(order)
           expect(order.line_items.first.adjustments.count).to eq(1)
           adjustment = order.line_items.first.adjustments.first
-          expect(adjustment.amount).to eq(0.48) # 10 - ( 10 / (1 + 5%  ) ) = 0.476, but we round to 2.
+          expect(adjustment.amount).to eq(0.48) # 10 - (10 / 105%) = 0.476, but we round to 2.
           expect(adjustment.included).to eq(true)
+        end
+      end
+
+      context "in the BC zone" do
+        before do
+          order.tax_zone = bc_zone
+          order.currency = "CAD"
+        end
+
+        it "applies both the GST (5%) and PST (7%) taxes" do
+          Spree::TaxRate.adjust(order)
+          expect(order.line_items.first.adjustments.count).to eq(2)
+          amounts = order.line_items.first.adjustments.map(&:amount)
+          expect(amounts).to match_array([0.65, 0.48])
+
+          inclusive = order.line_items.first.adjustments.map(&:included)
+          expect(inclusive.all?).to eq(true)
         end
       end
 
@@ -157,10 +233,10 @@ module Spree
         end
       end
 
-      context "with EUR zone as the default" do
+      context "with French zone as the default" do
         before do
           usa_zone.default_tax = false
-          eu_zone.default_tax = true
+          france_zone.default_tax = true
         end
 
         context "with an order for a USA customer" do

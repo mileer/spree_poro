@@ -15,7 +15,7 @@ module Spree
         # If you have a product priced in $10 USD, then it should be taxed at the USD rate.
         # If someone buys that $10 USD product and they're not from a US tax zone, no tax rate applies.
         # If that product is sold at $10 AUD instead, then the AUD tax rate should apply for that item, if there is one.
-        rate.currency == order.currency && (rate.zone == order.tax_zone || rate.zone == Zone.default_tax)
+        rate.currency == order.currency && (rate.zone.contains?(order.tax_zone) || rate.zone == Zone.default_tax)
       end
     end
 
@@ -59,8 +59,8 @@ module Spree
 
     def adjust(order)
       if self.zone == Zone.default_tax && order.tax_zone == Zone.default_tax
-        apply_tax_adjustment(order)
-      elsif self.zone == order.tax_zone # should be a contains? check, but I am lazy
+        apply_tax_adjustment(order) 
+      elsif self.zone.contains?(order.tax_zone)
         apply_tax_adjustment(order)
       elsif Zone.default_tax && self.included_in_price
         apply_refund(order)
