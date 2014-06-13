@@ -19,7 +19,7 @@ module Spree
       end
     end
 
-    def self.adjust(order)
+    def self.adjust(order, items)
       if order.tax_zone
         rates = self.match(order)
 
@@ -36,7 +36,7 @@ module Spree
         end
 
         rates.each do |rate|
-          rate.adjust(order)
+          rate.adjust(order, items)
         end
       end
     end
@@ -57,20 +57,20 @@ module Spree
       round_to_two_places(total - ( total / (1 + rate.amount) ) )
     end
 
-    def adjust(order)
+    def adjust(order, items)
       if self.zone == Zone.default_tax && order.tax_zone == Zone.default_tax
-        apply_tax_adjustment(order) 
+        apply_tax_adjustment(order, items) 
       elsif self.zone.contains?(order.tax_zone)
-        apply_tax_adjustment(order)
+        apply_tax_adjustment(order, items)
       elsif Zone.default_tax && self.included_in_price
-        apply_refund(order)
+        apply_refund(order, items)
       end
     end
 
     private
 
-    def apply_tax_adjustment(order)
-      order.line_items.each do |item|
+    def apply_tax_adjustment(order, items)
+      items.each do |item|
         if item.tax_category == tax_category
           adjustment = Spree::Adjustment.new
           adjustment.amount = compute(item)
@@ -80,8 +80,8 @@ module Spree
       end
     end
 
-    def apply_refund(order)
-      order.line_items.each do |item|
+    def apply_refund(order, items)
+      items.each do |item|
         if item.tax_category == tax_category
           adjustment = Spree::Adjustment.new
           adjustment.amount = -compute(item)

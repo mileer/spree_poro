@@ -171,7 +171,7 @@ module Spree
       end
 
       it "adds 10% default tax for the order's line item" do
-        Spree::TaxRate.adjust(order)
+        Spree::TaxRate.adjust(order, order.line_items)
         expect(order.line_items.first.adjustments.count).to eq(1)
         adjustment = order.line_items.first.adjustments.first
         expect(adjustment.amount).to eq(1) # = 10% of $10.
@@ -184,7 +184,7 @@ module Spree
         end
 
         it "does not apply an adjustment" do
-          Spree::TaxRate.adjust(order)
+          Spree::TaxRate.adjust(order, order.line_items)
           expect(order.line_items.first.adjustments.count).to eq(0)
         end
       end
@@ -196,7 +196,7 @@ module Spree
         end
 
         it "includes 5% tax for the order's line item" do
-          Spree::TaxRate.adjust(order)
+          Spree::TaxRate.adjust(order, order.line_items)
           expect(order.line_items.first.adjustments.count).to eq(1)
           adjustment = order.line_items.first.adjustments.first
           expect(adjustment.amount).to eq(0.48) # 10 - (10 / 105%) = 0.476, but we round to 2.
@@ -213,7 +213,7 @@ module Spree
         # See https://github.com/spree/spree/issues/4318#issuecomment-34601738
         # This is the only instance I know of in the world where two taxes can apply at once.
         it "applies both the GST (5%) and PST (7%) taxes" do
-          Spree::TaxRate.adjust(order)
+          Spree::TaxRate.adjust(order, order.line_items)
           expect(order.line_items.first.adjustments.count).to eq(2)
           amounts = order.line_items.first.adjustments.map(&:amount)
           expect(amounts).to match_array([0.65, 0.48])
@@ -230,7 +230,7 @@ module Spree
         
         # Tax rate is additional, so it makes no sense to refund a tax that hasn't been applied yet!
         it "applies no tax adjustment at all" do
-          Spree::TaxRate.adjust(order)
+          Spree::TaxRate.adjust(order, order.line_items)
           expect(order.line_items.first.adjustments.count).to eq(0)
         end
       end
@@ -247,7 +247,7 @@ module Spree
           end
 
           it "applies the 10% tax from the US" do
-            Spree::TaxRate.adjust(order)
+            Spree::TaxRate.adjust(order, order.line_items)
             expect(order.line_items.first.adjustments.count).to eq(1)
             adjustment = order.line_items.first.adjustments.first
             expect(adjustment.amount).to eq(1) #10% of $10.
@@ -262,7 +262,7 @@ module Spree
           end
 
           it "applies the 5% tax refund from EUR" do
-            Spree::TaxRate.adjust(order)
+            Spree::TaxRate.adjust(order, order.line_items)
             expect(order.line_items.first.adjustments.count).to eq(1)
             adjustment = order.line_items.first.adjustments.first
             expect(adjustment.amount).to eq(-0.48) # 10 - ( 10 / (1 + 5%  ) ) = 0.476, but we round to 2.
@@ -275,7 +275,7 @@ module Spree
             end
 
             it "does not apply a refund" do
-              Spree::TaxRate.adjust(order)
+              Spree::TaxRate.adjust(order, order.line_items)
               expect(order.line_items.first.adjustments.count).to eq(0)
             end 
           end
