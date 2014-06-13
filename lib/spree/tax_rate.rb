@@ -10,7 +10,7 @@ module Spree
     end
 
     def self.match(order)
-      rates = Spree::Data[:tax_rates].select do |rate|
+      Spree::Data[:tax_rates].select do |rate|
         # Rates are excluded based on currency because of this:
         # If you have a product priced in $10 USD, then it should be taxed at the USD rate.
         # If someone buys that $10 USD product and they're not from a US tax zone, no tax rate applies.
