@@ -210,6 +210,8 @@ module Spree
           order.currency = "CAD"
         end
 
+        # See https://github.com/spree/spree/issues/4318#issuecomment-34601738
+        # This is the only instance I know of in the world where two taxes can apply at once.
         it "applies both the GST (5%) and PST (7%) taxes" do
           Spree::TaxRate.adjust(order)
           expect(order.line_items.first.adjustments.count).to eq(2)
