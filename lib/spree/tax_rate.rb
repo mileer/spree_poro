@@ -36,16 +36,25 @@ module Spree
         end
 
         rates.each do |rate|
-          rate.adjust(order, items)
+          rate.adjust(items)
         end
       end
     end
 
-    def compute(line_item)
-      if included_in_price
-        deduced_total_by_rate(line_item.price, self)
+    def compute(item)
+      order = item.order
+      computed_amount = if included_in_price
+        deduced_total_by_rate(item.price, self)
       else
-        round_to_two_places(line_item.price * amount)
+        round_to_two_places(item.price * amount)
+      end
+
+      if (self.zone == Zone.default_tax && order.tax_zone == Zone.default_tax) || self.zone.contains?(order.tax_zone)
+        computed_amount
+      elsif Zone.default_tax && self.included_in_price
+        -computed_amount
+      else
+        0
       end
     end
 
@@ -57,35 +66,14 @@ module Spree
       round_to_two_places(total - ( total / (1 + rate.amount) ) )
     end
 
-    def adjust(order, items)
-      if self.zone == Zone.default_tax && order.tax_zone == Zone.default_tax
-        apply_tax_adjustment(order, items) 
-      elsif self.zone.contains?(order.tax_zone)
-        apply_tax_adjustment(order, items)
-      elsif Zone.default_tax && self.included_in_price
-        apply_refund(order, items)
-      end
-    end
-
-    private
-
-    def apply_tax_adjustment(order, items)
+    def adjust(items)
       items.each do |item|
+        amount = compute(item)
+        return if amount == 0
         if item.tax_category == tax_category
           adjustment = Spree::Adjustment.new
-          adjustment.amount = compute(item)
-          adjustment.included = self.included_in_price
-          item.adjustments << adjustment
-        end
-      end
-    end
-
-    def apply_refund(order, items)
-      items.each do |item|
-        if item.tax_category == tax_category
-          adjustment = Spree::Adjustment.new
-          adjustment.amount = -compute(item)
-          adjustment.included = false
+          adjustment.amount = amount
+          adjustment.included = amount < 0 ? false : self.included_in_price
           item.adjustments << adjustment
         end
       end

@@ -167,6 +167,7 @@ module Spree
         line_item = Spree::LineItem.new
         line_item.price = 10
         line_item.variant = variant
+        line_item.order = order
         order.line_items << line_item
       end
 
