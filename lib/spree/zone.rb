@@ -13,10 +13,6 @@ module Spree
       Spree::Data[:zones].find { |zone| zone.default_tax }
     end
 
-    def zoneables
-      members
-    end
-
     def contains?(target)
       return false if kind == 'state' && target.kind == 'country'
       return false if members.empty? || target.members.empty?
