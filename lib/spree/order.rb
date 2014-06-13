@@ -2,7 +2,7 @@ module Spree
   class Order
     attr_accessor :line_items, :adjustments
 
-    attr_accessor :item_total, :adjustment_total, :total, :coupon_code, :tax_zone
+    attr_accessor :item_total, :adjustment_total, :total, :coupon_code, :tax_zone, :currency
 
     def initialize
       self.line_items = []

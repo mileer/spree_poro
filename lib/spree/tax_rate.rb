@@ -2,7 +2,7 @@ require 'bigdecimal'
 
 module Spree
   class TaxRate
-    attr_accessor :tax_category, :name, :zone, :amount, :included_in_price
+    attr_accessor :tax_category, :name, :zone, :amount, :included_in_price, :currency
 
     def initialize
       Spree::Data[:tax_rates] ||= []
@@ -11,7 +11,11 @@ module Spree
 
     def self.match(order)
       rates = Spree::Data[:tax_rates].select do |rate|
-        rate.zone == order.tax_zone || rate.zone == Zone.default_tax
+        # Rates are excluded based on currency because of this:
+        # If you have a product priced in $10 USD, then it should be taxed at the USD rate.
+        # If someone buys that $10 USD product and they're not from a US tax zone, no tax rate applies.
+        # If that product is sold at $10 AUD instead, then the AUD tax rate should apply for that item, if there is one.
+        rate.currency == order.currency && (rate.zone == order.tax_zone || rate.zone == Zone.default_tax)
       end
     end
 
@@ -52,10 +56,6 @@ module Spree
     def deduced_total_by_rate(total, rate)
       round_to_two_places(total - ( total / (1 + rate.amount) ) )
     end
-    # Creates necessary tax adjustments for the order.
-    # [07:27:53]  <Radar>  if order.tax_zone returns nil, then there would not be 
-    # a default tax zone and there's either not enough info for the order to
-    # define its tax zone, or there is and there's just not a zone that matches
 
     def adjust(order)
       if self.zone == Zone.default_tax && order.tax_zone == Zone.default_tax

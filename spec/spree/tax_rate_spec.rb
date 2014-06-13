@@ -2,7 +2,12 @@
 
 module Spree
   describe TaxRate do
-    let!(:order) { Spree::Order.new }
+    let!(:order) do
+      order = Spree::Order.new
+      order.currency = 'USD'
+      order
+    end
+
     let!(:usa_zone) do
       zone = Spree::Zone.new
       zone.name = 'USA'
@@ -47,6 +52,7 @@ module Spree
       tax_rate.name = "USA 10%"
       tax_rate.included_in_price = false
       tax_rate.amount = 0.1
+      tax_rate.currency = "USD"
       tax_rate.tax_category = clothing_category
       clothing_category.tax_rates << tax_rate
       tax_rate.zone = usa_zone
@@ -58,6 +64,7 @@ module Spree
       tax_rate.name = "EUR 5%"
       tax_rate.included_in_price = true
       tax_rate.amount = 0.05
+      tax_rate.currency = "FRF"
       tax_rate.tax_category = clothing_category
       clothing_category.tax_rates << tax_rate
       tax_rate.zone = eu_zone
@@ -126,6 +133,7 @@ module Spree
       context "in the EU zone" do
         before do
           order.tax_zone = eu_zone
+          order.currency = 'FRF'
         end
 
         it "includes 5% tax for the order's line item" do
@@ -172,6 +180,7 @@ module Spree
         context "with an order for a AUS customer" do
           before do
             order.tax_zone = aus_zone
+            order.currency = 'FRF'
           end
 
           it "applies the 5% tax refund from EUR" do
@@ -180,6 +189,17 @@ module Spree
             adjustment = order.line_items.first.adjustments.first
             expect(adjustment.amount).to eq(-0.48) # 10 - ( 10 / (1 + 5%  ) ) = 0.476, but we round to 2.
             expect(adjustment.included).to eq(false)
+          end
+
+          context "when order uses AUD" do
+            before do
+              order.currency = 'AUD'
+            end
+
+            it "does not apply a refund" do
+              Spree::TaxRate.adjust(order)
+              expect(order.line_items.first.adjustments.count).to eq(0)
+            end 
           end
         end
       end
