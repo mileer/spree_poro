@@ -1,7 +1,7 @@
 module Spree
   class Promotion
     module Actions
-      class CreateLineItemAdjustment
+      class CreateLineItemAdjustment < Spree::PromotionAction
         attr_accessor :amount
 
         def run(order)

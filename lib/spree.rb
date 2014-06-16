@@ -12,6 +12,7 @@ require 'spree/variant'
 require 'spree/zone'
 
 require 'spree/promotion'
+require 'spree/promotion_action'
 require 'spree/promotion/actions/create_line_item_adjustment'
 
 module Spree
