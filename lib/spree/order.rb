@@ -15,9 +15,8 @@ module Spree
     end
 
     def calculate_adjustment_total
-      sum = lambda { |adjustments| adjustments.map(&:amount).inject(&:+).to_f }
-      sum.(adjustments) +
-      sum.(line_items.map(&:adjustments).flatten)
+      sum_adjustments(adjustments) + 
+      sum_adjustments(line_items.map(&:adjustments).flatten)
     end
 
     def update_totals
@@ -41,6 +40,12 @@ module Spree
 
     def tax_zone
       @tax_zone || Zone.default_tax
+    end
+
+    private
+
+    def sum_adjustments(adjustments)
+      adjustments.map(&:amount).inject(&:+).to_f
     end
   end
 end
