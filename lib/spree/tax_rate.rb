@@ -87,7 +87,7 @@ module Spree
 
     def adjust(items)
       items.each do |item|
-        amount = compute(item)
+        amount = compute_amount(item)
         return if amount == 0
         if item.tax_category == tax_category
           adjustment = Spree::Adjustment.new

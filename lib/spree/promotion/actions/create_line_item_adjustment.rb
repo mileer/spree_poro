@@ -6,8 +6,16 @@ module Spree
 
         def run(order)
           order.line_items.each do |item|
-            item.price = (item.price - self.amount).round(2)
+            adjustment = Spree::Adjustment.new
+            adjustment.source == self
+            adjustment.amount = compute_amount(item)
+            item.adjustments << adjustment
+            ItemAdjustments.new(item).calculate_adjustments
           end
+        end
+
+        def compute_amount(item)
+          -self.amount
         end
       end
     end

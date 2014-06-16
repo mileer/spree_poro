@@ -9,15 +9,29 @@ module Spree
 
     context "#update_totals" do
       context "with a line item" do
-        before do
+        let!(:item) do
           item = Spree::LineItem.new
           item.price = 19.99
           subject.line_items = [item]
+          item
         end
 
-        it "sets the total" do
-          subject.update_totals
-          expect(subject.total).to eq(19.99)
+        context "with no discount" do
+          it "sets the total" do
+            subject.update_totals
+            expect(subject.total).to eq(19.99)
+          end
+        end
+
+        context "with a discount" do
+          before do
+            item.promo_total = -10
+          end
+
+          it "sets the total" do
+            subject.update_totals
+            expect(subject.total).to eq(9.99)
+          end
         end
       end
     end

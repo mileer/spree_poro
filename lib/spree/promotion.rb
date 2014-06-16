@@ -1,6 +1,6 @@
 module Spree
   class Promotion
-    attr_accessor :code, :actions
+    attr_accessor :code, :actions, :name
 
     def initialize
       self.actions = []
