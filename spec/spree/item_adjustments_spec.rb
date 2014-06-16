@@ -118,6 +118,7 @@ module Spree
         adjustment = Spree::Adjustment.new
         adjustment.source = promotion_action
         adjustment.adjustable = item
+        adjustment.amount = -10
         adjustment.eligible = true
         adjustment
       end
