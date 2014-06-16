@@ -19,6 +19,21 @@ module Spree
       end
     end
 
+    # Pre-tax amounts must be stored so that we can calculate
+    # correct rate amounts in the future. For example:
+    # https://github.com/spree/spree/issues/4318#issuecomment-34723428
+    def self.store_pre_tax_amount(item, rates)
+      if rates.any? { |r| r.included_in_price }
+        case item
+        when Spree::LineItem
+          item_amount = item.discounted_amount
+        when Spree::Shipment
+          item_amount = item.discounted_cost
+        end
+        item.pre_tax_amount = item_amount / (1 + rates.map(&:amount).inject(&:+).to_f)
+      end
+    end
+
     def self.adjust(order, items)
       if order.tax_zone
         rates = self.match(order)
@@ -35,18 +50,22 @@ module Spree
           rates.delete_if { |rate| rate.zone == Zone.default_tax }
         end
 
+        items.each do |item|
+          store_pre_tax_amount(item, rates)
+        end
+
         rates.each do |rate|
           rate.adjust(items)
         end
       end
     end
 
-    def compute(item)
+    def compute_amount(item)
       order = item.order
       computed_amount = if included_in_price
-        deduced_total_by_rate(item.price, self)
+        deduced_total_by_rate(item.pre_tax_amount, self)
       else
-        round_to_two_places(item.price * amount)
+        round_to_two_places(item.discounted_amount * amount)
       end
 
       if (self.zone == Zone.default_tax && order.tax_zone == Zone.default_tax) || self.zone.contains?(order.tax_zone)
@@ -63,7 +82,7 @@ module Spree
     end
 
     def deduced_total_by_rate(total, rate)
-      round_to_two_places(total - ( total / (1 + rate.amount) ) )
+      ((rate.amount * 100) * total) / 100
     end
 
     def adjust(items)

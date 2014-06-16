@@ -166,6 +166,7 @@ module Spree
 
         line_item = Spree::LineItem.new
         line_item.price = 10
+        line_item.discounted_amount = 10
         line_item.variant = variant
         line_item.order = order
         order.line_items << line_item
@@ -176,6 +177,15 @@ module Spree
         expect(order.line_items.first.adjustments.count).to eq(1)
         adjustment = order.line_items.first.adjustments.first
         expect(adjustment.amount).to eq(1) # = 10% of $10.
+        expect(adjustment.included).to eq(false)
+      end
+
+      it "bases the 10% off the discounted amount" do
+        order.line_items.first.discounted_amount = 5
+        Spree::TaxRate.adjust(order, order.line_items)
+        expect(order.line_items.first.adjustments.count).to eq(1)
+        adjustment = order.line_items.first.adjustments.first
+        expect(adjustment.amount).to eq(0.5) # = 10% of $5.
         expect(adjustment.included).to eq(false)
       end
 
@@ -200,7 +210,7 @@ module Spree
           Spree::TaxRate.adjust(order, order.line_items)
           expect(order.line_items.first.adjustments.count).to eq(1)
           adjustment = order.line_items.first.adjustments.first
-          expect(adjustment.amount).to eq(0.48) # 10 - (10 / 105%) = 0.476, but we round to 2.
+          expect(adjustment.amount.round(2)).to eq(0.48) # 10 - (10 / 105%) = 0.476, but we round to 2.
           expect(adjustment.included).to eq(true)
         end
       end
@@ -215,12 +225,15 @@ module Spree
         # This is the only instance I know of in the world where two taxes can apply at once.
         it "applies both the GST (5%) and PST (7%) taxes" do
           Spree::TaxRate.adjust(order, order.line_items)
-          expect(order.line_items.first.adjustments.count).to eq(2)
-          amounts = order.line_items.first.adjustments.map(&:amount)
-          expect(amounts).to match_array([0.65, 0.48])
-
+          item = order.line_items.first
+          expect(item.adjustments.count).to eq(2)
           inclusive = order.line_items.first.adjustments.map(&:included)
           expect(inclusive.all?).to eq(true)
+
+          amounts = item.adjustments.map(&:amount).sort
+          expect(amounts.first.round(2)).to eq(0.45)
+          expect(amounts.last.round(2)).to eq(0.63)
+          expect((amounts.inject(&:+) + item.pre_tax_amount).round(2)).to eq(item.discounted_amount)
         end
       end
 
@@ -266,7 +279,7 @@ module Spree
             Spree::TaxRate.adjust(order, order.line_items)
             expect(order.line_items.first.adjustments.count).to eq(1)
             adjustment = order.line_items.first.adjustments.first
-            expect(adjustment.amount).to eq(-0.48) # 10 - ( 10 / (1 + 5%  ) ) = 0.476, but we round to 2.
+            expect(adjustment.amount.round(2)).to eq(-0.48) # 10 - ( 10 / (1 + 5%  ) ) = 0.476, but we round to 2.
             expect(adjustment.included).to eq(false)
           end
 
