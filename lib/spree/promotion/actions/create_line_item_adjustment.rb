@@ -7,8 +7,9 @@ module Spree
         def run(order)
           order.line_items.each do |item|
             adjustment = Spree::Adjustment.new
-            adjustment.source == self
+            adjustment.source = self
             adjustment.amount = compute_amount(item)
+            adjustment.adjustable = item
             item.adjustments << adjustment
             ItemAdjustments.new(item).calculate_adjustments
           end

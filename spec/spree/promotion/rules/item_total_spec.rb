@@ -4,28 +4,45 @@ module Spree
   class Promotion
     module Rules
       describe ItemTotal do
-        let(:order) { Spree::Order.new }
-
         subject do 
           rule = Spree::Promotion::Rules::ItemTotal.new
           rule.threshold = 100
           rule
         end
 
+        let(:order) { Spree::Order.new }
 
-        it "is eligible if equal to threshold" do
-          order.item_total = 100
-          expect(subject.eligible?(order)).to be_truthy
+        shared_examples "eligibility checks" do
+          it "is eligible if item total equal to threshold" do
+            order.item_total = 100
+            expect(subject.eligible?(item)).to be_truthy
+          end
+
+          it "is eligible if item total above threshold" do
+            order.item_total = 101
+            expect(subject.eligible?(item)).to be_truthy
+          end
+
+          it "is ineligible if item total below threshold" do
+            order.item_total = 99
+            expect(subject.eligible?(item)).to be_falsey
+          end
         end
 
-        it "is eligible if above threshold" do
-          order.item_total = 101
-          expect(subject.eligible?(order)).to be_truthy
+        context "when receiving an order" do
+          let(:item) { order }
+
+          it_behaves_like "eligibility checks"
         end
 
-        it "is ineligible if below threshold" do
-          order.item_total = 99
-          expect(subject.eligible?(order)).to be_falsey
+        context "when receiving a line item" do
+          let(:item) do
+            item = Spree::LineItem.new
+            item.order = order
+            item
+          end
+
+          it_behaves_like "eligibility checks"
         end
       end
     end

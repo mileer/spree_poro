@@ -2,7 +2,9 @@ module Spree
   class Order
     attr_accessor :line_items, :adjustments, :shipments
 
-    attr_accessor :item_total, :adjustment_total, :total, :coupon_code, :tax_zone, :currency
+    attr_accessor :item_total, :adjustment_total, :promo_total, :total,
+                  :included_tax_total, :additional_tax_total,
+                  :coupon_code, :tax_zone, :currency
 
     def initialize
       self.line_items = []
@@ -23,6 +25,15 @@ module Spree
       self.item_total = calculate_item_total
       self.adjustment_total = calculate_adjustment_total
       self.total = (item_total + adjustment_total).round(2)
+    end
+
+    def update_adjustments
+      update_totals
+      Spree::ItemAdjustments.new(self).calculate_adjustments
+    end
+
+    def all_adjustments
+      self.adjustments + self.line_items.map(&:adjustments).flatten
     end
 
     def apply_coupon_code

@@ -56,20 +56,20 @@ module Spree
         other_promotions.each do |adjustment|
           adjustment.eligible = false
         end
+        
+        best_promotion_adjustment.eligible = true
+
+        best_promotion_adjustment
       end
     end
 
     def best_promotion_adjustment
-      @best_promotion_adjustment ||= begin
-        if promo_adjustments.any? { |adjustment| adjustment.eligible? }
-          promo_adjustments.sort do |adjustment_1, adjustment_2|
-            adjustment_1.amount <=> adjustment_2.amount
-          end.first
-        end
-      end
+      best_adjustment = promo_adjustments.select(&:eligible?).sort do |adjustment_1, adjustment_2|
+        adjustment_1.amount <=> adjustment_2.amount
+      end.first
 
       # If none found, return a dummy adjustment
-      @best_promotion_adjustment ||= begin
+      best_adjustment ||= begin
         adjustment = Spree::Adjustment.new
         adjustment.amount = 0
         adjustment

@@ -222,13 +222,90 @@ module Spree
       end
 
       context "when previously ineligible promotions become available" do
-        let(:order_promo1) { create(:promotion, :with_order_adjustment, :with_item_total_rule, order_adjustment_amount: 5, item_total_threshold_amount: 10) }
-        let(:order_promo2) { create(:promotion, :with_order_adjustment, :with_item_total_rule, order_adjustment_amount: 10, item_total_threshold_amount: 20) }
+        let(:order_promo1) do
+          promotion = Spree::Promotion.new
+          promotion.name = "$5 off for orders over $20"
+
+          rule = Spree::Promotion::Rules::ItemTotal.new
+          rule.threshold = 20
+          promotion.rules << rule
+
+          action = Spree::Promotion::Actions::CreateAdjustment.new
+          action.amount = 5
+          action.promotion = promotion
+          promotion.actions << action
+
+          promotion
+        end
+
+        let(:order_promo2) do
+          promotion = Spree::Promotion.new
+          promotion.name = "$10 off for orders over $40"
+
+          rule = Spree::Promotion::Rules::ItemTotal.new
+          rule.threshold = 40
+          promotion.rules << rule
+
+          action = Spree::Promotion::Actions::CreateAdjustment.new
+          action.amount = 10
+          action.promotion = promotion
+          promotion.actions << action
+
+          promotion
+        end
+
+        let(:line_item_promo1) do
+          promotion = Spree::Promotion.new
+          promotion.name = "$2.5 off orders over $20"
+
+          rule = Spree::Promotion::Rules::ItemTotal.new
+          rule.threshold = 20
+          promotion.rules << rule
+
+          action = Spree::Promotion::Actions::CreateLineItemAdjustment.new
+          action.amount = 2.5
+          action.promotion = promotion
+          promotion.actions << action
+
+          promotion
+        end
+
+        let(:line_item_promo2) do
+          promotion = Spree::Promotion.new
+          promotion.name = "$5 off orders over $40"
+
+          rule = Spree::Promotion::Rules::ItemTotal.new
+          rule.threshold = 40
+          promotion.rules << rule
+
+          action = Spree::Promotion::Actions::CreateLineItemAdjustment.new
+          action.amount = 5
+          action.promotion = promotion
+          promotion.actions << action
+
+          promotion
+        end
+
+        let(:order) do
+          order = Spree::Order.new
+          order.line_items << item
+          order.update_totals
+          order
+        end
+
+        let(:item_2) do 
+          item = Spree::LineItem.new
+          item.price = 30
+          item.order = order
+          item
+        end
+
+        before do
+          item.order = order
+        end
+
         let(:order_promos) { [ order_promo1, order_promo2 ] }
-        let(:line_item_promo1) { create(:promotion, :with_line_item_adjustment, :with_item_total_rule, adjustment_rate: 2.5, item_total_threshold_amount: 10) }
-        let(:line_item_promo2) { create(:promotion, :with_line_item_adjustment, :with_item_total_rule, adjustment_rate: 5, item_total_threshold_amount: 20) }
         let(:line_item_promos) { [ line_item_promo1, line_item_promo2 ] }
-        let(:order) { create(:order_with_line_items, line_items_count: 1) }
 
         # Apply promotions in different sequences. Results should be the same.
         promo_sequences = [
@@ -242,18 +319,18 @@ module Spree
             order_promos[promo_sequence[0]].activate order: order
             order_promos[promo_sequence[1]].activate order: order
 
-            order.reload
-            order.all_adjustments.count.should eq(2), "Expected two adjustments (using sequence #{promo_sequence})"
-            order.all_adjustments.eligible.count.should eq(1), "Expected one elegible adjustment (using sequence #{promo_sequence})"
-            order.all_adjustments.eligible.first.source.promotion.should eq(order_promo1), "Expected promo1 to be used (using sequence #{promo_sequence})"
+            expect(order.adjustments.count).to eq(2), "Expected two adjustments (using sequence #{promo_sequence})"
+            eligible_adjustments = order.adjustments.select(&:eligible?)
+            expect(eligible_adjustments.count).to eq(1), "Expected one elegible adjustment (using sequence #{promo_sequence})"
+            expect(eligible_adjustments.first.source.promotion).to eq(order_promo1), "Expected promo1 to be used (using sequence #{promo_sequence})"
 
-            order.contents.add create(:variant, price: 10), 1
-            order.save
+            order.line_items << item_2
+            order.update_adjustments
 
-            order.reload
-            order.all_adjustments.count.should eq(2), "Expected two adjustments (using sequence #{promo_sequence})"
-            order.all_adjustments.eligible.count.should eq(1), "Expected one elegible adjustment (using sequence #{promo_sequence})"
-            order.all_adjustments.eligible.first.source.promotion.should eq(order_promo2), "Expected promo2 to be used (using sequence #{promo_sequence})"
+            expect(order.adjustments.count).to eq(2), "Expected two adjustments (using sequence #{promo_sequence})"
+            eligible_adjustments = order.adjustments.select(&:eligible?)
+            expect(eligible_adjustments.count).to eq(1), "Expected one elegible adjustment (using sequence #{promo_sequence})"
+            expect(eligible_adjustments.first.source.promotion).to eq(order_promo2), "Expected promo2 to be used (using sequence #{promo_sequence})"
           end
         end
 
@@ -263,21 +340,21 @@ module Spree
             line_item_promos[promo_sequence[0]].activate order: order
             line_item_promos[promo_sequence[1]].activate order: order
 
-            order.reload
-            order.all_adjustments.count.should eq(2), "Expected two adjustments (using sequence #{promo_sequence})"
-            order.all_adjustments.eligible.count.should eq(1), "Expected one elegible adjustment (using sequence #{promo_sequence})"
-            # TODO: Really, with the rule we've applied to these promos, we'd expect line_item_promo2
-            # to be selected; however, all of the rules are currently completely broken for line-item-
-            # level promos. To make this spec work for now we just roll with current behavior.
+            expect(order.all_adjustments.count).to eq(2), "Expected two adjustments (using sequence #{promo_sequence})"
+            eligible_adjustments = order.all_adjustments.select(&:eligible?)
+            expect(eligible_adjustments.count).to eq(1), "Expected one elegible adjustment (using sequence #{promo_sequence})"
+            expect(eligible_adjustments.first.source.promotion).to eq(line_item_promo1), "Expected promo1 to be used (using sequence #{promo_sequence})"
 
-            order.contents.add create(:variant, price: 10), 1
-            order.save
+            order.line_items << item_2
+            order.update_adjustments
 
-            order.reload
-            order.all_adjustments.count.should eq(4), "Expected four adjustments (using sequence #{promo_sequence})"
-            order.all_adjustments.eligible.count.should eq(2), "Expected two elegible adjustments (using sequence #{promo_sequence})"
-            order.all_adjustments.eligible.each do |adjustment|
-              adjustment.source.promotion.should eq(line_item_promo2), "Expected line_item_promo2 to be used (using sequence #{promo_sequence})"
+            require 'pry'
+            binding.pry
+            expect(order.all_adjustments.count).to eq(4), "Expected four adjustments (using sequence #{promo_sequence})"
+            eligible_adjustments = order.all_adjustments.select(&:eligible?)
+            expect(eligible_adjustments.count).to eq(2), "Expected one elegible adjustment (using sequence #{promo_sequence})"
+            eligible_adjustments.each do |adjustment|
+              expect(adjustment.source.promotion).to eq(line_item_promo_2), "Expected promo2 to be used (using sequence #{promo_sequence})"
             end
           end
         end
@@ -325,14 +402,14 @@ module Spree
         end
       end
       
-      let(:subject) { SuperItemAdjustments.new(line_item) }
+      let(:subject) { SuperItemAdjustments.new(item) }
 
       it "calls all the callbacks" do
-        subject.update_adjustments
-        expect(subject.before_promo_adjustments_called).to be_true
-        expect(subject.after_promo_adjustments_called).to be_true
-        expect(subject.before_tax_adjustments_called).to be_true
-        expect(subject.after_tax_adjustments_called).to be_true
+        subject.calculate_adjustments
+        expect(subject.before_promo_adjustments_called).to eq(true)
+        expect(subject.after_promo_adjustments_called).to eq(true)
+        expect(subject.before_tax_adjustments_called).to eq(true)
+        expect(subject.after_tax_adjustments_called).to eq(true)
       end
     end
   end

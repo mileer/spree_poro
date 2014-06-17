@@ -13,11 +13,18 @@ module Spree
       if source.present?
         amount = source.compute_amount(target || adjustable)
         self.amount = amount
-        # if promotion?
-          # self.update_column(:eligible, source.promotion.eligible?(adjustable))
-        # end
+        if promotion?
+          p "#{source.promotion.name}: #{source.promotion.eligible?(adjustable)}"
+          self.eligible = source.promotion.eligible?(adjustable)
+        end
       end
       amount
+    end
+
+    private
+
+    def promotion?
+      Spree::PromotionAction === self.source
     end
   end
 end
