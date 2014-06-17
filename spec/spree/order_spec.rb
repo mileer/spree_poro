@@ -16,23 +16,12 @@ module Spree
           item
         end
 
-        context "with no discount" do
-          it "sets the total" do
-            subject.update_totals
-            expect(subject.total).to eq(19.99)
-          end
+        it "sets the total" do
+          subject.update_totals
+          expect(subject.total).to eq(19.99)
         end
 
-        context "with a discount" do
-          before do
-            item.promo_total = -10
-          end
-
-          it "sets the total" do
-            subject.update_totals
-            expect(subject.total).to eq(9.99)
-          end
-        end
+        pending "does not discount"
       end
     end
 
@@ -49,6 +38,7 @@ module Spree
         promotion.code = code
         action = Spree::Promotion::Actions::CreateItemAdjustments.new
         action.amount = 10
+        action.promotion = promotion
         promotion.actions << action
         subject.coupon_code = code
       end

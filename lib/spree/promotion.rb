@@ -15,11 +15,7 @@ module Spree
     end
 
     def eligible?(item)
-      eligible = rules.all? { |r| r.eligible?(item) }
-      p "#{name} eligible?: #{eligible}"
-      eligible
+      rules.all? { |r| r.eligible?(item) }
     end
-
-    private
   end
 end

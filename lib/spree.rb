@@ -15,9 +15,11 @@ require 'spree/zone'
 require 'spree/promotion'
 require 'spree/promotion_action'
 require 'spree/promotion/actions/create_adjustment'
-require 'spree/promotion/actions/create_line_item_adjustment'
+require 'spree/promotion/actions/create_item_adjustments'
 
 require 'spree/promotion/rules/item_total'
+
+require 'spree/promotion_handler/cart'
 
 require 'spree/item_adjustments'
 

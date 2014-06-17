@@ -13,17 +13,6 @@ module Spree
         expect(subject.eligible?(order)).to eq(true)
       end
 
-      context "#activate" do
-        before do
-          subject.actions << action
-        end
-
-        it "runs the actions" do
-          expect(action).to receive(:run)
-          subject.activate(order)
-        end
-      end
-
       context 'with an ineligible rule' do
         before do
           subject.rules << double('Rule', eligible?: false)
@@ -31,17 +20,6 @@ module Spree
 
         it "is not eligible" do
           expect(subject.eligible?(order)).to eq(false)
-        end
-
-        context "#activate" do
-          before do
-            subject.actions << action
-          end
-
-          it "does not run the actions" do
-            expect(action).to_not receive(:run)
-            subject.activate(order)
-          end
         end
       end
     end
@@ -54,18 +32,6 @@ module Spree
       it "is not eligible" do
         expect(subject.eligible?(order)).to eq(false)
       end
-
-      context "#activate" do
-        before do
-          subject.actions << action
-        end
-
-        it "does not run the actions" do
-          expect(action).to_not receive(:run)
-          subject.activate(order)
-        end
-      end
     end
-
   end
 end

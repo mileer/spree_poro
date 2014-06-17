@@ -13,7 +13,7 @@ module Spree
     end
 
     def calculate_item_total
-      line_items.map(&:discounted_amount).inject(&:+).to_f
+      line_items.map(&:price).inject(&:+).to_f
     end
 
     def calculate_adjustment_total
@@ -43,7 +43,7 @@ module Spree
         end
 
         if promotion
-          promotion.activate(self)
+          promotion.activate(order: self)
           update_totals
         end
       end
@@ -51,6 +51,10 @@ module Spree
 
     def tax_zone
       @tax_zone || Zone.default_tax
+    end
+
+    def contents
+      OrderContents.new(self)
     end
 
     private

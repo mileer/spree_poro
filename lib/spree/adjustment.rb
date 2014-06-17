@@ -14,7 +14,6 @@ module Spree
         amount = source.compute_amount(target || adjustable)
         self.amount = amount
         if promotion?
-          p "#{source.promotion.name}: #{source.promotion.eligible?(adjustable)}"
           self.eligible = source.promotion.eligible?(adjustable)
         end
       end
