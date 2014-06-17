@@ -90,7 +90,7 @@ module Spree
       end
 
       let(:promotion_action) do
-        action = Spree::Promotion::Actions::CreateLineItemAdjustment.new
+        action = Spree::Promotion::Actions::CreateItemAdjustments.new
         action.amount = 10
         action
       end
@@ -167,7 +167,7 @@ module Spree
 
     context "best promotion is always applied" do
       let(:action) do
-        action = Spree::Promotion::Actions::CreateLineItemAdjustment.new
+        action = Spree::Promotion::Actions::CreateItemAdjustments.new
         action.amount = 10
         action
       end
@@ -262,7 +262,7 @@ module Spree
           rule.threshold = 20
           promotion.rules << rule
 
-          action = Spree::Promotion::Actions::CreateLineItemAdjustment.new
+          action = Spree::Promotion::Actions::CreateItemAdjustments.new
           action.amount = 2.5
           action.promotion = promotion
           promotion.actions << action
@@ -278,7 +278,7 @@ module Spree
           rule.threshold = 40
           promotion.rules << rule
 
-          action = Spree::Promotion::Actions::CreateLineItemAdjustment.new
+          action = Spree::Promotion::Actions::CreateItemAdjustments.new
           action.amount = 5
           action.promotion = promotion
           promotion.actions << action

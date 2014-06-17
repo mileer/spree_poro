@@ -47,7 +47,7 @@ module Spree
 
         promotion = Promotion.new
         promotion.code = code
-        action = Spree::Promotion::Actions::CreateLineItemAdjustment.new
+        action = Spree::Promotion::Actions::CreateItemAdjustments.new
         action.amount = 10
         promotion.actions << action
         subject.coupon_code = code
