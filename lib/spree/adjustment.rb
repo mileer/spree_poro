@@ -8,8 +8,12 @@ module Spree
       !!@eligible
     end
 
+    def closed?
+      state == 'closed'
+    end
+
     def update!(target = nil)
-      # return amount if closed?
+      return amount if closed?
       if source.present?
         amount = source.compute_amount(target || adjustable)
         self.amount = amount
