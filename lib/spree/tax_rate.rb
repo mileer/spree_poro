@@ -23,8 +23,9 @@ module Spree
     # correct rate amounts in the future. For example:
     # https://github.com/spree/spree/issues/4318#issuecomment-34723428
     def self.store_pre_tax_amount(item, rates)
-      if rates.any? { |r| r.included_in_price }
-        item.pre_tax_amount = item.discounted_amount / (1 + rates.map(&:amount).inject(&:+).to_f)
+      if rates.any?(&:included_in_price)
+        rate_total = rates.map(&:amount).inject(&:+).to_f
+        item.pre_tax_amount = item.discounted_amount / (1 + rate_total)
       end
     end
 
