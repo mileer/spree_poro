@@ -337,7 +337,7 @@ module Spree
         end
 
         promo_sequences.each do |promo_sequence|
-          xit "should pick the best line-item-level promo according to current eligibility" do
+          it "should pick the best line-item-level promo according to current eligibility" do
             # apply both promos to the order, even though only promo1 is eligible
             line_item_promos[promo_sequence[0]].activate order: order
             line_item_promos[promo_sequence[1]].activate order: order
@@ -354,7 +354,7 @@ module Spree
             eligible_adjustments = order.all_adjustments.select(&:eligible?)
             expect(eligible_adjustments.count).to eq(2), "Expected one elegible adjustment (using sequence #{promo_sequence})"
             eligible_adjustments.each do |adjustment|
-              expect(adjustment.source.promotion).to eq(line_item_promo_2), "Expected promo2 to be used (using sequence #{promo_sequence})"
+              expect(adjustment.source.promotion).to eq(line_item_promo2), "Expected promo2 to be used (using sequence #{promo_sequence})"
             end
           end
         end
@@ -365,14 +365,19 @@ module Spree
         let!(:promo_c) { create_adjustment("Promotion C", -300) }
 
         before do
-          promo_a.update_column(:eligible, true)
-          promo_c.update_column(:eligible, false)
+          promo_a.eligible = true
+          promo_c.eligible = false
         end
 
         # regression for #3274
-        xit "still makes the previous best eligible adjustment valid" do
+        it "still makes the previous best eligible adjustment valid" do
           subject.choose_best_promotion_adjustment
-          line_item.adjustments.promotion.eligible.first.label.should == 'Promotion A'
+          eligible_promotion_adjustments = item.adjustments.select do |adjustment|
+            Spree::PromotionAction === adjustment.source && adjustment.eligible?
+          end
+
+          expect(eligible_promotion_adjustments.count).to eq(1)
+          expect(eligible_promotion_adjustments.first.label).to eq('Promotion A')
         end
       end
     end

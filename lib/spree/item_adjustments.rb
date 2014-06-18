@@ -17,6 +17,13 @@ module Spree
     end
 
     def calculate_adjustments
+      calculate_promo_total
+      calculate_tax_total
+
+      item.adjustment_total = item.promo_total + item.additional_tax_total
+    end
+
+    def calculate_promo_total
       promo_total = 0
       run_callbacks :promo_adjustments do
         promo_total = calculate(promo_adjustments)
@@ -25,15 +32,15 @@ module Spree
         end
         item.promo_total = best_promotion_adjustment.amount.to_f
       end
+    end
 
+    def calculate_tax_total
       included_tax_total = 0
       additional_tax_total = 0
       run_callbacks :tax_adjustments do
         item.included_tax_total = calculate(included_tax_adjustments)
         item.additional_tax_total = calculate(additional_tax_adjustments)
       end
-
-      item.adjustment_total = item.promo_total + item.additional_tax_total
     end
 
     def update_totals
@@ -56,7 +63,7 @@ module Spree
         other_promotions.each do |adjustment|
           adjustment.eligible = false
         end
-        
+      
         best_promotion_adjustment.eligible = true
 
         best_promotion_adjustment

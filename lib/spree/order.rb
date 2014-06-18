@@ -17,8 +17,15 @@ module Spree
     end
 
     def calculate_adjustment_total
+      check_promotions
       sum_adjustments(adjustments) + 
       sum_adjustments(line_items.map(&:adjustments).flatten)
+    end
+
+    def check_promotions
+      line_items.each do |item|
+        Spree::ItemAdjustments.new(item).calculate_promo_total
+      end
     end
 
     def update_totals

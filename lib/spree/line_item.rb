@@ -1,6 +1,6 @@
 module Spree
   class LineItem
-    attr_accessor :price, :adjustments, :variant, :order, 
+    attr_accessor :number, :price, :adjustments, :variant, :order, 
                   :promo_total, :included_tax_total, :additional_tax_total,
                   :adjustment_total, :pre_tax_amount
 
