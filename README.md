@@ -1,29 +1,12 @@
-# SpreePoro
+# Spree PORO
 
-TODO: Write a gem description
+[![Code Climate](https://codeclimate.com/github/radar/spree_poro.png)](https://codeclimate.com/github/radar/spree_poro)
 
-## Installation
+This is an attempt to represent Spree's data model in Plain Old Ruby Objects.
 
-Add this line to your application's Gemfile:
+## Why?
 
-    gem 'spree_poro'
+**TL;DR:** Too many database calls, factories and callbacks makes Ryan a sadpanda.
 
-And then execute:
+For a longer explanation as to why this project exists [read my post](http://ryanbigg.com/2014/06/spree-factories-and-callbacks/).
 
-    $ bundle
-
-Or install it yourself as:
-
-    $ gem install spree_poro
-
-## Usage
-
-TODO: Write usage instructions here
-
-## Contributing
-
-1. Fork it ( http://github.com/<my-github-username>/spree_poro/fork )
-2. Create your feature branch (`git checkout -b my-new-feature`)
-3. Commit your changes (`git commit -am 'Add some feature'`)
-4. Push to the branch (`git push origin my-new-feature`)
-5. Create new Pull Request
