@@ -24,7 +24,7 @@ module Spree
     # https://github.com/spree/spree/issues/4318#issuecomment-34723428
     def self.store_pre_tax_amount(item, rates)
       if rates.any?(&:included_in_price)
-        rate_total = rates.map(&:amount).inject(&:+)
+        rate_total = rates.inject(0) { |sum, rate| sum + rate.amount }
         item.pre_tax_amount = item.discounted_amount / (1 + rate_total)
       end
     end
