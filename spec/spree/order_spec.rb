@@ -20,8 +20,6 @@ module Spree
           subject.update_totals
           expect(subject.total).to eq(19.99)
         end
-
-        pending "does not discount"
       end
     end
 
