@@ -83,12 +83,6 @@ module Spree
         rate
       end
 
-      let(:promotion) do
-        promotion = Spree::Promotion.new
-        promotion.name = "$10 off"
-        promotion
-      end
-
       let(:promotion_action) do
         action = Spree::Promotion::Actions::CreateItemAdjustments.new
         action.amount = 10
