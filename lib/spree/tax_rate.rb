@@ -55,28 +55,13 @@ module Spree
     end
 
     def compute_amount(item)
-      order = item.order
       computed_amount = if included_in_price
         deduced_total_by_rate(item.pre_tax_amount, self)
       else
         round_to_two_places(item.discounted_amount * amount)
       end
 
-      if (self.zone == Zone.default_tax && order.tax_zone == Zone.default_tax) || self.zone.contains?(order.tax_zone)
-        computed_amount
-      elsif Zone.default_tax && self.included_in_price
-        -computed_amount
-      else
-        0
-      end
-    end
-
-    def round_to_two_places(amount)
-      BigDecimal.new(amount.to_s).round(2, BigDecimal::ROUND_HALF_UP)
-    end
-
-    def deduced_total_by_rate(total, rate)
-      ((rate.amount * 100) * total) / 100
+      correct_amount_for_zone(item, computed_amount)
     end
 
     def adjust(items)
@@ -89,6 +74,27 @@ module Spree
           adjustment.included = amount < 0 ? false : self.included_in_price
           item.adjustments << adjustment
         end
+      end
+    end
+
+    private
+
+    def round_to_two_places(amount)
+      BigDecimal.new(amount.to_s).round(2, BigDecimal::ROUND_HALF_UP)
+    end
+
+    def deduced_total_by_rate(total, rate)
+      ((rate.amount * 100) * total) / 100
+    end
+
+    def correct_amount_for_zone(item, amount)
+      order = item.order
+      if (self.zone == Zone.default_tax && order.tax_zone == Zone.default_tax) || self.zone.contains?(order.tax_zone)
+        amount
+      elsif Zone.default_tax && self.included_in_price
+        -amount
+      else
+        0
       end
     end
   end
