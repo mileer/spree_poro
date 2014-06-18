@@ -24,13 +24,7 @@ module Spree
     # https://github.com/spree/spree/issues/4318#issuecomment-34723428
     def self.store_pre_tax_amount(item, rates)
       if rates.any? { |r| r.included_in_price }
-        case item
-        when Spree::LineItem
-          item_amount = item.discounted_amount
-        when Spree::Shipment
-          item_amount = item.discounted_cost
-        end
-        item.pre_tax_amount = item_amount / (1 + rates.map(&:amount).inject(&:+).to_f)
+        item.pre_tax_amount = item.discounted_amount / (1 + rates.map(&:amount).inject(&:+).to_f)
       end
     end
 
