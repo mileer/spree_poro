@@ -9,5 +9,5 @@ This is an attempt to represent Spree's data model in Plain Old Ruby Objects.
 
 **TL;DR:** Too many database calls, factories and callbacks makes Ryan a sadpanda.
 
-For a longer explanation as to why this project exists [read my post](http://ryanbigg.com/2014/06/spree-factories-and-callbacks/).
+For a longer explanation as to why this project exists [read my post](http://ryanbigg.com/2014/06/spree-factories-and-callbacks/). For why it uses Lotus, [read my other post](http://ryanbigg.com/2014/06/initial-thoughts-on-lotus/).
 
