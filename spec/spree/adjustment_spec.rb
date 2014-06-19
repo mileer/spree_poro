@@ -2,7 +2,11 @@ require 'spec_helper'
 
 module Spree
   describe Adjustment do
-    subject { Spree::Adjustment.new(source: double('Source') ) }
+    subject do 
+      adjustment = Spree::Adjustment.new
+      adjustment.source = double('Source')
+      adjustment
+    end
 
     context "when open" do
       before { subject.state = 'open' }

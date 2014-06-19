@@ -2,7 +2,7 @@ require 'active_support/core_ext/object/blank'
 
 module Spree
   class Adjustment
-    attr_accessor :amount, :source, :included, :eligible, :adjustable, :label
+    attr_accessor :amount, :source, :included, :eligible, :adjustable, :label, :state
 
     def eligible?
       !!@eligible
