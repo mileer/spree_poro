@@ -1,19 +1,6 @@
 require "spree/version"
 
-require 'lotus/model'
-require 'lotus/model/adapters/memory_adapter'
-
 module Spree
-
-  @@adapter_class = Lotus::Model::Adapters::MemoryAdapter
-
-  def self.adapter_class
-    @@adapter_class
-  end
-
-  def self.adapter_class=(klass)
-    @@adapter_class = klass
-  end
 
   Data = Hash.new { |hash, key| hash[key] = [] }
   
@@ -50,5 +37,3 @@ require 'spree/promotion/rules/item_total'
 require 'spree/promotion_handler/cart'
 
 require 'spree/item_adjustments'
-
-require 'spree/repositories/all'

@@ -76,8 +76,8 @@ module Spree
         create(:tax_rate, 
           currency: 'USD',
           amount: 0.05,
-          tax_category_id: tax_category.id,
-          zone_id: zone.id
+          tax_category: tax_category,
+          zone: zone
         )
       end
 
@@ -91,7 +91,7 @@ module Spree
 
       let(:product) do
         product = Spree::Product.new
-        product.tax_category_id = tax_category.id
+        product.tax_category = tax_category
         product
       end
 
@@ -129,7 +129,6 @@ module Spree
         before do
           tax_adjustment.included = true
           tax_rate.included_in_price = true
-          Spree::TaxRateRepository.update(tax_rate)
           Spree::TaxRate.adjust(order, [item], [tax_rate])
         end
 

@@ -2,8 +2,7 @@ require 'bigdecimal'
 
 module Spree
   class TaxRate
-    include Lotus::Entity
-    self.attributes = [:name, :amount, :included_in_price, :currency, :zone_id, :tax_category_id]
+    attr_accessor :name, :amount, :included_in_price, :currency, :zone, :tax_category
 
     # Pre-tax amounts must be stored so that we can calculate
     # correct rate amounts in the future. For example:
