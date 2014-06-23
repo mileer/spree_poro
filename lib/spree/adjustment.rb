@@ -12,14 +12,18 @@ module Spree
       state == 'closed'
     end
 
+    def determine_eligibility
+      if promotion?
+        self.eligible = source.promotion.eligible?(adjustable)
+      end
+    end
+
     def update!(target = nil)
       return amount if closed?
       if source.present?
         amount = source.compute_amount(target || adjustable)
         self.amount = amount
-        if promotion?
-          self.eligible = source.promotion.eligible?(adjustable)
-        end
+        determine_eligibility
       end
       amount
     end

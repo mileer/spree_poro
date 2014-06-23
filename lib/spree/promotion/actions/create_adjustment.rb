@@ -10,7 +10,7 @@ module Spree
           adjustment.amount = compute_amount(order)
           adjustment.adjustable = order
           order.adjustments << adjustment
-          adjustment.update!
+          adjustment.determine_eligibility
         end
 
         def compute_amount(order)
