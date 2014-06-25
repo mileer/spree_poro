@@ -1,4 +1,6 @@
 require "spree/version"
+require "virtus"
+require "inflecto"
 
 module Spree
 

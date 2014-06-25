@@ -1,16 +1,23 @@
+require 'spree/line_item'
+require 'spree/adjustment'
+require 'spree/shipment'
+
 module Spree
   class Order
-    attr_accessor :line_items, :adjustments, :shipments
+    include Virtus.model
 
-    attr_accessor :item_total, :adjustment_total, :promo_total, :total,
-                  :included_tax_total, :additional_tax_total,
-                  :coupon_code, :tax_zone, :currency
+    attribute :item_total, Float
+    attribute :adjustment_total, Float
+    attribute :promo_total, Float
+    attribute :total, Float
+    attribute :included_tax_total, Float
+    attribute :additional_tax_total, Float
+    attribute :currency, String
+    attribute :line_items, Array['Spree::LineItem']
+    attribute :adjustments, Array['Spree::Adjustment']
+    attribute :shipments, Array['Spree::Shipment']
 
-    def initialize
-      self.line_items = []
-      self.shipments = []
-      self.adjustments = []
-    end
+    attr_accessor :tax_zone, :coupon_code
 
     def calculate_item_total
       line_items.map(&:price).inject(&:+).to_f
