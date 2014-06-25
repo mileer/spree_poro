@@ -22,8 +22,9 @@ end
 RSpec.configure do |c| 
   c.include Spree::TestHelpers
 
-  c.before do
+  c.after do
     Spree::Data.clear
+    Spree::BaseRepository.redis.flushall
   end
 
 end

@@ -1,6 +1,7 @@
 require "spree/version"
 require "virtus"
 require "inflecto"
+require "redis"
 
 module Spree
 
@@ -39,3 +40,6 @@ require 'spree/promotion/rules/item_total'
 require 'spree/promotion_handler/cart'
 
 require 'spree/item_adjustments'
+
+require 'spree/repositories'
+require 'spree/serializers'
