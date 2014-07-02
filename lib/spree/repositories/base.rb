@@ -9,7 +9,7 @@ module Spree
       attrs = JSON.parse(redis.get("#{base_key}:#{id}"))
       Object.const_get(base_class_name).new(attrs)
     end
-    
+
     def self.redis
       @redis ||= Redis.connect
     end
@@ -17,7 +17,7 @@ module Spree
     private
 
     def self.serialize(object)
-      Object.const_get("#{base_class_name}Serializer").new(object).to_json
+      object.active_model_serializer.new(object).as_json.to_json
     end
 
     def self.base_key

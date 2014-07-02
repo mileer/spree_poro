@@ -7,10 +7,11 @@ module Spree
     subject { Spree::ProductSerializer.new(product) }
 
     it "can serialize a product to JSON" do
-      expect(JSON.parse(subject.to_json)).to eq(
+      expect(subject.as_json).to eq(
         {
-          "id" => nil,
-          "name" => product.name
+          id: nil,
+          name: product.name,
+          tax_category: nil
         }
       )
     end
