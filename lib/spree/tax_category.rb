@@ -1,5 +1,9 @@
 module Spree
   class TaxCategory
-    attr_accessor :name
+    include Virtus.model
+    include ActiveModel::Serialization
+    include ActiveModel::SerializerSupport
+
+    attribute :name, String
   end
 end

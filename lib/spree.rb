@@ -2,11 +2,13 @@ require "spree/version"
 require "virtus"
 require "inflecto"
 require "redis"
+require "active_model/serialization"
+require "active_model_serializers"
 
 module Spree
 
   Data = Hash.new { |hash, key| hash[key] = [] }
-  
+
   Config = {
     currency_decimal_mark: ".",
     currency_symbol_position: "before",
@@ -17,6 +19,15 @@ module Spree
   }
 end
 
+ActiveSupport.on_load(:active_model_serializers) do
+  # Disable for all serializers (except ArraySerializer)
+  ActiveModel::Serializer.root = false
+
+  # Disable for ArraySerializer
+  ActiveModel::ArraySerializer.root = false
+end
+
+require 'spree/tax_category'
 require 'spree/adjustment'
 require 'spree/country'
 require 'spree/line_item'
@@ -25,7 +36,6 @@ require 'spree/order_contents'
 require 'spree/product'
 require 'spree/shipment'
 require 'spree/state'
-require 'spree/tax_category'
 require 'spree/tax_rate'
 require 'spree/variant'
 require 'spree/zone'
