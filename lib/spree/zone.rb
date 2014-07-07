@@ -1,16 +1,14 @@
 module Spree
   class Zone
-    include Lotus::Entity
-
-    self.attributes = :name, :members, :default_tax, :kind
+    attr_accessor :name, :members, :default_tax, :kind
 
     def initialize(*args)
       @members ||= []
-      super
+      Spree::Data[:zones] << self
     end
 
     def self.default_tax
-      Spree::ZoneRepository.default
+      Spree::Data[:zones].detect { |z| z.default_tax }
     end
 
     def contains?(target)
@@ -23,10 +21,6 @@ module Spree
         return false if target.members.any? { |target_state| !members.include?(target_state.country) }
       end
       true
-    end
-
-    def ==(other)
-      id ? super : object_id == other.object_id
     end
   end
 end

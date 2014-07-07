@@ -58,11 +58,16 @@ module Spree
 
     context "taxes and promotions" do
       let(:tax_category) do
-        create(:tax_category, name: 'Clothing')
+        tax_category = Spree::TaxCategory.new
+        tax_category.name = 'Clothing'
+        tax_category
       end
 
       let(:zone) do
-        create(:zone, name: 'America', default_tax: true)
+        zone = Spree::Zone.new
+        zone.name = 'America'
+        zone.default_tax = true
+        zone
       end
 
       let(:order) do
@@ -73,12 +78,12 @@ module Spree
       end
 
       let(:tax_rate) do
-        create(:tax_rate, 
-          currency: 'USD',
-          amount: 0.05,
-          tax_category_id: tax_category.id,
-          zone_id: zone.id
-        )
+        tax_rate = Spree::TaxRate.new
+        tax_rate.currency = 'USD'
+        tax_rate.amount = 0.05
+        tax_rate.tax_category = tax_category
+        tax_rate.zone = zone
+        tax_rate
       end
 
       let(:promotion_action) do
@@ -91,7 +96,7 @@ module Spree
 
       let(:product) do
         product = Spree::Product.new
-        product.tax_category_id = tax_category.id
+        product.tax_category = tax_category
         product
       end
 
@@ -129,7 +134,6 @@ module Spree
         before do
           tax_adjustment.included = true
           tax_rate.included_in_price = true
-          Spree::TaxRateRepository.update(tax_rate)
           Spree::TaxRate.adjust(order, [item], [tax_rate])
         end
 
