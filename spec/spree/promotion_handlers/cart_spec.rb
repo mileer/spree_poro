@@ -17,10 +17,8 @@ module Spree
         Spree::Promotion.new
       end
 
-      subject { Cart.new(order, line_item) }
-
       before do
-        allow(subject).to receive(:promotions).and_return([promotion])
+        allow(described_class).to receive(:promotions).and_return([promotion])
       end
 
       context "activates in LineItem level" do
@@ -36,7 +34,7 @@ module Spree
 
         it "creates the adjustment" do
           expect {
-            subject.activate
+            described_class.activate(order, line_item)
           }.to change { adjustable.adjustments.count }.by(1)
         end
       end
@@ -54,7 +52,7 @@ module Spree
 
         it "creates the adjustment" do
           expect {
-            subject.activate
+            described_class.activate(order, line_item)
           }.to change { adjustable.adjustments.count }.by(1)
         end
       end

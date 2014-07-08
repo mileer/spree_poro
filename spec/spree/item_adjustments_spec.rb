@@ -300,6 +300,9 @@ module Spree
         end
 
         before do
+          promotions = [line_item_promo1, line_item_promo2]
+          allow(Spree::PromotionHandler::Cart).to receive(:promotions).and_return(promotions)
+
           item.order = order
         end
 

@@ -16,7 +16,7 @@ module Spree
     private
 
     def activate_cart_promotions(item)
-      PromotionHandler::Cart.new(order, item).activate
+      PromotionHandler::Cart.activate(order, item)
     end
   end
 end
