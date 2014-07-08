@@ -95,7 +95,7 @@ module Spree
     end
 
     def contents
-      OrderContents.new(self)
+      @contents ||= OrderContents.new(self)
     end
 
     private
