@@ -31,6 +31,14 @@ module Spree
       zone
     end
 
+
+    context ".default_tax" do
+      it "returns the default tax zone" do
+        allow(Spree::Repositories::Zone).to receive(:first).with(default_tax: true)
+        Spree::Zone.default_tax
+      end
+    end
+
     context "#contains?" do
       it "Canada zone contains Canada" do
         expect(canada_zone.contains?(canada_zone)).to be true

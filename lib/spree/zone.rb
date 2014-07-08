@@ -4,11 +4,10 @@ module Spree
 
     def initialize(*args)
       @members ||= []
-      Spree::Data[:zones] << self
     end
 
     def self.default_tax
-      Spree::Data[:zones].detect { |z| z.default_tax }
+      Spree::Repositories::Zone.first(:default_tax => true)
     end
 
     def contains?(target)

@@ -39,6 +39,8 @@ module Spree
         action.promotion = promotion
         promotion.actions << action
         subject.coupon_code = code
+
+        allow(subject).to receive(:find_promotion_by_coupon_code).and_return(promotion)
       end
 
       it "applies the coupon code" do

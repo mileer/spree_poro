@@ -1,8 +1,6 @@
 require "spree/version"
 
-module Spree
-  Data = Hash.new { |hash, key| hash[key] = [] }
-  
+module Spree 
   Config = {
     currency_decimal_mark: ".",
     currency_symbol_position: "before",
@@ -36,3 +34,6 @@ require 'spree/promotion/rules/item_total'
 require 'spree/promotion_handler/cart'
 
 require 'spree/item_adjustments'
+
+require 'spree/repositories/promotion'
+require 'spree/repositories/zone'

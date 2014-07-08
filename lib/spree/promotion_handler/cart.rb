@@ -31,7 +31,7 @@ module Spree
       private
 
         def promotions
-          Spree::Data[:promotions].select { |promotion| promotion.code.nil? }
+          Spree::Repositories::Promotion.where(:code => nil)
         end
     end
   end

@@ -4,7 +4,6 @@ require 'simplecov'
 SimpleCov.start
 
 require 'spree'
-require 'inflecto'
 
 module Spree
   module TestHelpers
@@ -19,9 +18,4 @@ end
 
 RSpec.configure do |c| 
   c.include Spree::TestHelpers
-
-  c.before do
-    Spree::Data.clear
-  end
-
 end

@@ -5,9 +5,6 @@ module Spree
     def initialize
       self.actions = []
       self.rules = []
-
-      Spree::Data[:promotions] ||= []
-      Spree::Data[:promotions] << self
     end
 
     def activate(payload)

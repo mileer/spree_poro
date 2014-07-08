@@ -123,6 +123,8 @@ module Spree
       end
 
       before do
+        allow(Zone).to receive(:default_tax).and_return(zone)
+
         item.order = order
         item.adjustments << tax_adjustment
         item.adjustments << promo_adjustment

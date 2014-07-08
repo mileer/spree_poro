@@ -83,11 +83,7 @@ module Spree
 
     def apply_coupon_code
       if coupon_code
-        promotion = Spree::Data[:promotions].find do |promotion|
-          promotion.code == coupon_code
-        end
-
-        if promotion
+        if promotion = find_promotion_by_coupon_code
           promotion.activate(order: self)
           update_totals
         end
@@ -103,6 +99,10 @@ module Spree
     end
 
     private
+
+    def find_promotion_by_coupon_code
+      Spree::Repositories::Promotion.where(:code => coupon_code).first
+    end
 
     def sum_adjustments(adjustments)
       adjustments.map(&:amount).inject(&:+).to_f

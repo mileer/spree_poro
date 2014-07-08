@@ -1,5 +1,3 @@
-require 'active_support/core_ext/object/blank'
-
 module Spree
   class Adjustment
     attr_accessor :amount, :source, :included, :eligible, :adjustable, :label, :state
@@ -14,7 +12,7 @@ module Spree
 
     def update!(target = nil)
       return amount if closed?
-      if source.present?
+      if source
         amount = source.compute_amount(target || adjustable)
         self.amount = amount
         if promotion?
